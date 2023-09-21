@@ -1,10 +1,12 @@
-import sympy
 import sympy as sp
 from typing import Optional
 
 
 class BisectionProcessor:
-    def __init__(self, func: callable, epsilon: float, a: Optional[float] = None, b: Optional[float] = None, interval_find_step: float = 1, interval_max_iterations: int = 100000, interval_start_iterations: Optional[int] = None):
+    def __init__(self, func: callable, epsilon: float, a: Optional[float] = None, b: Optional[float] = None,
+                 interval_find_step: float = 1, interval_max_iterations: int = 100000,
+                 interval_start_iterations: Optional[int] = None):
+
         """
         :param func: The function whose root needs to be found
         :param a: Start number changing signs on an interval (if known)
@@ -14,6 +16,7 @@ class BisectionProcessor:
         :param interval_max_iterations: Maximum number of the end of iterations for searching intervals a, b
         :param interval_start_iterations: Minimum number of the start of iterations for searching intervals a, b (by default = -1interval_max_iterations)
         """
+
         self.x = sp.symbols('x')
         self.equations: list[str] = []
 
@@ -33,7 +36,10 @@ class BisectionProcessor:
     def _get_signs(integers: list[int | float]) -> str:
         return f'({", ".join(["-" if sign < 0 else "+" if sign != 0 else "" for sign in integers])})'
 
-    def find_intervals(self):
+    def find_intervals(self) -> list[tuple[int | float, int | float]]:
+        """
+        :return: List of intervals where the function value changes its sign
+        """
         intervals = []
 
         while self.start_iters < self.max_iters:
@@ -90,33 +96,34 @@ class BisectionProcessor:
                       f"| {self._get_signs([f(c), f(old_b)])} {statuses[0][0]}{[c, old_b]}{statuses[0][1]}\n"
                 equation.append(eq)
 
+            solution = (self.a + self.b) / 2
+
+            equation.append(f"Ответ: {self.a} + {self.b} / 2 = {solution}. Так как {self.b} - {self.a} ≈ {self.b-self.a:6f} < {self.epsilon} (epsilon)")
+
             self.equations.append(equation)
 
-            self.solutions.append((self.a + self.b) / 2)
+            self.solutions.append(solution)
 
         return self.solutions
 
     def print_last_equations(self) -> None:
         print(f"Всего решений: {len(self.equations)}")
         for solution_index, solution in enumerate(self.equations):
-            print(f"Решение {solution_index+1}:")
+            print(f"Решение {solution_index + 1}:")
             for step_index, step in enumerate(solution):
-                print(f"\t{step_index+1}. {step}")
-
-
+                print(f"\t{step_index + 1}. {step}")
 
 
 def f(x: int | float) -> int | float:
-    return x**3-12*x+10
+    return x ** 3 - 12 * x + 10  # заменить вашей функцией
+
+
+# пример использования
 
 
 epsilon = 10 ** -4
 
 processor = BisectionProcessor(f, epsilon=epsilon)
-processor.find_solutions(extra=False)
+processor.find_solutions()
 
 processor.print_last_equations()
-
-
-
-
